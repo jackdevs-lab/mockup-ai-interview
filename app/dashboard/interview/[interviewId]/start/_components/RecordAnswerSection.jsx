@@ -61,8 +61,7 @@ function RecordAnswerSection({ mockInterviewQuestion,activeQuestion,interview })
         feedback: jsonFeedbackRes?.feedback,
         rating: jsonFeedbackRes?.rating,
         userEmail: user?.primaryEmailAddress?.emailAddress,
-        createdAt: moment().format('DD-MM-YYYY')
-      });
+        createdAt: new Date()      });
       if (rep) {
         toast('User Answer Recorded Successfully');
         setUserRecAnswer('');
