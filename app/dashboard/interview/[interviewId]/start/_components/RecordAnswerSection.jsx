@@ -12,7 +12,7 @@ import { db } from '@/utils/db'
 import { userAnswer } from '@/utils/schema'
 import moment from 'moment'
 
-function RecordAnswerSection({ mockInterviewQuestion,activeQuestion,interview }) {
+function RecordAnswerSection({ mockInterviewQuestion, activeQuestion, interview }) {
   const [userRecAnswer, setUserRecAnswer] = useState('');
   const { user } = useUser();
   const [loading, setLoading] = useState(false);
@@ -30,6 +30,7 @@ function RecordAnswerSection({ mockInterviewQuestion,activeQuestion,interview })
   });
 
   useEffect(() => {
+    console.log('Results:', results);
     results.map((res) => {
       setUserRecAnswer(prev => prev + res?.transcript);
     });
@@ -39,15 +40,13 @@ function RecordAnswerSection({ mockInterviewQuestion,activeQuestion,interview })
     if (!isRecording && userRecAnswer.length > 10) {
       updateUserAnswer();
     }
-  }, [userRecAnswer]);
-
-  
- 
+  }, [isRecording, userRecAnswer]);
 
   const updateUserAnswer = async () => {
-    console.log(userRecAnswer);
-    setLoading(true);
-    const feedbackPrompt = `Question: ${mockInterviewQuestion[activeQuestion]?.question}, User Answer: ${userRecAnswer}, Depends on question and user answer for given interview question, please give us a rating for the answer and feedback as an area of improvement if any in just 3 to 5 lines to improve it in JSON format with rating field and feedback field.`;
+    try {
+      console.log('Saving answer:', userRecAnswer);
+      setLoading(true);
+      const feedbackPrompt = `Question: ${mockInterviewQuestion[activeQuestion]?.question}, User Answer: ${userRecAnswer}, Depends on question and user answer for given interview question, please give us a rating for the answer and feedback as an area of improvement if any in just 3 to 5 lines to improve it in JSON format with rating field and feedback field.`;
       
       const res = await chatSession.sendMessage(feedbackPrompt);
       const mockJsonResp = (res.response.text()).replace('```json', '').replace('```', '');
@@ -61,53 +60,58 @@ function RecordAnswerSection({ mockInterviewQuestion,activeQuestion,interview })
         feedback: jsonFeedbackRes?.feedback,
         rating: jsonFeedbackRes?.rating,
         userEmail: user?.primaryEmailAddress?.emailAddress,
-        createdAt: new Date()      });
+        createdAt: new Date()
+      });
+
       if (rep) {
         toast('User Answer Recorded Successfully');
-        setUserRecAnswer('');
-        setResults([]);
       }
+    } catch (error) {
+      console.error('Error:', error);
+      toast('Error recording answer');
+    } finally {
+      setUserRecAnswer('');
       setResults([]);
       setLoading(false);
+    }
   };
 
   const StartStopRecording = () => {
+    console.log('Recording state:', isRecording);
     if (isRecording) {
       stopSpeechToText();
     } else {
+      setUserRecAnswer('');
+      setResults([]);
       startSpeechToText();
     }
   };
 
   return (
     <div className='flex items-center justify-center flex-col'>
-    <div className='flex flex-col justify-center items-center bg-black  p-5 mt-20'>
-      <Image src={'/webCam.png'} width={200} height={200} className='absolute'/>
-      <Webcam
-      mirrored={true}
-      style={{
-        height:300,
-        width:"100%",
-        zIndex:10
-      }}
-      />
+      <div className='flex flex-col justify-center items-center bg-black p-5 mt-20'>
+        <Image src={'/webCam.png'} width={200} height={200} className='absolute'/>
+        <Webcam
+          mirrored={true}
+          style={{ height: 300, width: "100%", zIndex: 10 }}
+        />
+      </div>
+      <Button 
+        variant='outline' 
+        className='my-10' 
+        onClick={StartStopRecording}
+        disabled={loading}
+      >
+        {isRecording ? (
+          <h2 className='flex gap-2 text-red-600'>
+            <StopCircle/>Stop Recording...
+          </h2>
+        ) : (
+          'Record Answer'
+        )}
+      </Button>
     </div>
-    <Button 
-      variant='outline' 
-      className='my-10' 
-      onClick={StartStopRecording}
-      disabled={loading}
-    >
-      {isRecording?
-      <h2 className='flex gap-2 text-red-600'>
-        <StopCircle/>Stop Recording...
-      </h2>:
-      'Record Answer'
-      }
-    </Button>
-    
-    </div>
-  )
+  );
 }
 
-export default RecordAnswerSection
+export default RecordAnswerSection;
