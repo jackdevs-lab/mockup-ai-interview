@@ -13,8 +13,9 @@ const Header=()=> {
 
   return (
     <div className='flex p-4 items-center justify-between bg-secondary shadow-sm'>
-      <Image src={'/Bot.png'} width={60} height={100} alt='logo'/>
-      <ul className='hidden md:flex gap-6'>
+<Link href="/">
+        <Image src={'/Bot.png'} width={60} height={100} alt='logo' />
+      </Link>      <ul className='hidden md:flex gap-6'>
         <Link href="/dashboard">
           <li className={`hover:text-primary hover:font-bold transition-all cursor-pointer ${path=='/dashboard'&&'text-primary font-bold'}`}>Dashboard</li>
         </Link>
