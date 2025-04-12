@@ -89,7 +89,7 @@ export default function Home() {
       </div>
       
       <div className="bg-gray-100 p-4 text-center">
-        <p>&copy; 2024 AI Mock Interview Job Preparation By Ndegwa</p>
+        <p>&copy; 2025 AI Mock Interview Job Preparation By Ndegwa</p>
       </div>
     </div>
   );
